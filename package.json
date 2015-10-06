@@ -8,6 +8,7 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
+    "hidemyass": "^2.0.1",
     "http-proxy": "^1.11.2",
     "mitm": "^1.2.0"
   },
@@ -22,9 +23,15 @@
     "Fábio Santos <fabiosantosart@gmail.com> (http://frutal.pt/)"
   ],
   "license": "MIT",
-  "tags": [ "proxy", "intercept", "http", "requests", "random" ],
+  "tags": [
+    "proxy",
+    "intercept",
+    "http",
+    "requests",
+    "random"
+  ],
   "repository": {
-    "type" : "git",
+    "type": "git",
     "url": "https://github.com/xicombd/bumboo.git"
   },
   "precommit": [

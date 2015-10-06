@@ -1,25 +1,42 @@
 var Mitm = require('mitm')
 var httpProxy = require('http-proxy')
+var hidemyass = require('hidemyass')
 
-var mitm = Mitm()
+module.exports = function (options, callback) {
+  hidemyass
+    .proxies()
+    .get(gotProxies)
 
-// test proxy
-var proxyDetails = {
-  port: 80,
-  host: '198.169.246.30'
-}
+  function gotProxies (err, proxies) {
+    if (err) {
+      return callback(new Error('could not get proxies'))
+    }
 
-var proxy = httpProxy.createProxyServer({
-  target: proxyDetails
-})
+    callback()
 
-mitm.on('connect', function (socket, opts) {
-  if (opts.host === proxyDetails.host) {
-    socket.bypass()
-    return
+    var proxiesUrls = []
+    var proxiesDetails = proxies.map(function (prox) {
+      proxiesUrls.push(prox.ip + ':' + prox.port)
+      return { host: prox.ip, port: prox.port }
+    })
+
+    console.log('got proxies', proxiesDetails)
+
+    var proxy = httpProxy.createProxyServer({
+      target: proxiesDetails[0]
+    })
+
+    var mitm = Mitm()
+
+    mitm.on('connect', function (socket, opts) {
+      if (proxiesUrls.indexOf(opts.host + ':' + opts.port) === -1) {
+        socket.bypass()
+        return
+      }
+    })
+
+    mitm.on('request', function (req, res) {
+      proxy.web(req, res)
+    })
   }
-})
-
-mitm.on('request', function (req, res) {
-  proxy.web(req, res)
-})
+}
