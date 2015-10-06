@@ -1,0 +1,33 @@
+{
+  "name": "bumboo",
+  "version": "0.0.1",
+  "description": "Makes your http requests go through random proxies. Arr!",
+  "main": "index.js",
+  "scripts": {
+    "lint": "standard --verbose | snazzy",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "http-proxy": "^1.11.2",
+    "mitm": "^1.2.0"
+  },
+  "devDependencies": {
+    "pre-commit": "^1.1.1",
+    "request": "^2.64.0",
+    "snazzy": "^2.0.1",
+    "standard": "^5.3.1"
+  },
+  "authors": [
+    "Francisco Dias <francisco@baiodias.com> (http://franciscodias.net/)",
+    "Fábio Santos <fabiosantosart@gmail.com> (http://frutal.pt/)"
+  ],
+  "license": "MIT",
+  "tags": [ "proxy", "intercept", "http", "requests", "random" ],
+  "repository": {
+    "type" : "git",
+    "url": "https://github.com/xicombd/bumboo.git"
+  },
+  "precommit": [
+    "lint"
+  ]
+}
