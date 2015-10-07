@@ -39,7 +39,9 @@ module.exports = function (options, callback) {
 
     console.log('got', proxies.length, 'proxies')
 
-    var proxyHosts = proxies.map(prox => prox.host)
+    var proxyHosts = proxies.map(function (prox) {
+      return prox.host
+    })
 
     var proxy = httpProxy.createProxyServer()
 
