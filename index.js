@@ -3,7 +3,7 @@ var httpProxy = require('http-proxy')
 var hidemyass = require('hidemyass')
 var sample = require('lodash.sample')
 
-function getProxies (callback) {
+function defaultGetProxies (callback) {
   hidemyass
     .proxies()
     .get(gotProxies)
@@ -26,6 +26,8 @@ function getProxies (callback) {
 }
 
 module.exports = function (options, callback) {
+  var getProxies = options.getProxies || defaultGetProxies
+
   getProxies(gotProxies)
 
   function gotProxies (err, proxies) {
