@@ -13,9 +13,13 @@ function getProxies (callback) {
       return callback(new Error('could not get proxies'))
     }
 
-    var proxiesDetails = proxies.map(function (prox) {
-      return { host: prox.ip, port: prox.port }
-    })
+    var proxiesDetails = proxies
+      .filter(function (prox) {
+        return ['http', 'https'].indexOf(prox.protocol) !== -1 // prox.connection_time < 100
+      })
+      .map(function (prox) {
+        return { protocol: prox.protocol, host: prox.ip, port: prox.port }
+      })
 
     callback(null, proxiesDetails)
   }
@@ -24,33 +28,49 @@ function getProxies (callback) {
 module.exports = function (options, callback) {
   getProxies(gotProxies)
 
-  function gotProxies (err, _proxiesDetails) {
+  function gotProxies (err, proxies) {
     if (err) {
       return callback(new Error('could not get proxies'))
     }
 
     callback()
 
-    var proxyDetails = sample(_proxiesDetails)
+    console.log('got', proxies.length, 'proxies')
 
-    console.log('got proxy', proxyDetails)
+    var proxyHosts = proxies.map(prox => prox.host)
 
-    var proxy = httpProxy.createProxyServer({
-      target: proxyDetails
+    var proxy = httpProxy.createProxyServer()
+
+    proxy.on('error', function (err, req, res) {
+      console.log('proxy error', err)
+
+      res.writeHead(598, {
+        'Content-Type': 'text/plain'
+      })
+
+      res.end('Error on proxy')
     })
 
     var mitm = Mitm()
 
     mitm.on('connect', function (socket, opts) {
-      if (opts.host === proxyDetails.host) {
+      if (proxyHosts.indexOf(opts.host) !== -1) {
         console.log('bypassing', opts.host + ':' + opts.port)
         socket.bypass()
         return
       }
+
+      console.log('proxying connnect to', opts.host + ':' + opts.port)
     })
 
     mitm.on('request', function (req, res) {
-      proxy.web(req, res)
+      var random = sample(proxies)
+
+      var target = random.protocol + '://' + random.host + ':' + random.port
+
+      console.log('proxying request to target', target)
+
+      proxy.web(req, res, { target: target })
     })
   }
 }

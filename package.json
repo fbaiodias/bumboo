@@ -13,6 +13,7 @@
     "mitm": "^1.2.0"
   },
   "devDependencies": {
+    "async": "^1.4.2",
     "pre-commit": "^1.1.1",
     "request": "^2.64.0",
     "snazzy": "^2.0.1",
