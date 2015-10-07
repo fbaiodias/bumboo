@@ -1,8 +1,9 @@
 var Mitm = require('mitm')
 var httpProxy = require('http-proxy')
 var hidemyass = require('hidemyass')
+var sample = require('lodash.sample')
 
-module.exports = function (options, callback) {
+function getProxies (callback) {
   hidemyass
     .proxies()
     .get(gotProxies)
@@ -12,24 +13,37 @@ module.exports = function (options, callback) {
       return callback(new Error('could not get proxies'))
     }
 
-    callback()
-
-    var proxiesUrls = []
     var proxiesDetails = proxies.map(function (prox) {
-      proxiesUrls.push(prox.ip + ':' + prox.port)
       return { host: prox.ip, port: prox.port }
     })
 
-    console.log('got proxies', proxiesDetails)
+    callback(null, proxiesDetails)
+  }
+}
+
+module.exports = function (options, callback) {
+  getProxies(gotProxies)
+
+  function gotProxies (err, _proxiesDetails) {
+    if (err) {
+      return callback(new Error('could not get proxies'))
+    }
+
+    callback()
+
+    var proxyDetails = sample(_proxiesDetails)
+
+    console.log('got proxy', proxyDetails)
 
     var proxy = httpProxy.createProxyServer({
-      target: proxiesDetails[0]
+      target: proxyDetails
     })
 
     var mitm = Mitm()
 
     mitm.on('connect', function (socket, opts) {
-      if (proxiesUrls.indexOf(opts.host + ':' + opts.port) === -1) {
+      if (opts.host === proxyDetails.host) {
+        console.log('bypassing', opts.host + ':' + opts.port)
         socket.bypass()
         return
       }
